@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>관리자 | 남도실업</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #1a2e4a;
+      --blue:   #2c5f8a;
+      --light:  #e8f3fb;
+      --border: #d0e4f0;
+      --text:   #1e2d3d;
+      --gray:   #8fa3b5;
+      --red:    #dc2626;
+      --green:  #16a34a;
+      --bg:     #f4f7fa;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+    input, select, textarea { font-family: inherit; font-size: 14px; }
+
+    /* ── LOGIN ── */
+    #login-wrap {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    }
+    .login-box {
+      background: #fff; border-radius: 10px; padding: 44px 48px;
+      width: 380px; box-shadow: 0 16px 48px rgba(0,0,0,.2); text-align: center;
+    }
+    .login-box h1 { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .login-box p  { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+    .login-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 6px;
+      padding: 12px 14px; font-size: 15px; margin-bottom: 12px; outline: none; transition: border-color .2s;
+    }
+    .login-input:focus { border-color: var(--blue); }
+    .login-btn {
+      width: 100%; background: var(--navy); color: #fff;
+      padding: 13px; border-radius: 6px; font-size: 15px; font-weight: 600; transition: background .2s;
+    }
+    .login-btn:hover { background: var(--blue); }
+    .login-error { color: var(--red); font-size: 13px; margin-top: 10px; min-height: 20px; }
+    .login-hint  { font-size: 12px; color: var(--gray); margin-top: 20px; }
+
+    /* ── DASHBOARD ── */
+    #dashboard { display: none; min-height: 100vh; }
+    .admin-header {
+      background: var(--navy); color: #fff; padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between; height: 56px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .admin-header-left { display: flex; align-items: center; gap: 16px; }
+    .admin-header h1   { font-size: 17px; font-weight: 600; }
+    .admin-header a    { font-size: 12px; color: #8fa8bf; }
+    .admin-header a:hover { color: #fff; }
+    .logout-btn {
+      background: rgba(255,255,255,.12); color: #c8dde9;
+      padding: 6px 16px; border-radius: 4px; font-size: 13px;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,.22); color: #fff; }
+
+    .admin-tabs {
+      background: #fff; border-bottom: 2px solid var(--border); padding: 0 32px; display: flex;
+    }
+    .tab-btn {
+      padding: 14px 24px; font-size: 14px; font-weight: 500; color: var(--gray);
+      border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color .2s, border-color .2s;
+    }
+    .tab-btn:hover { color: var(--blue); }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+    .admin-body { max-width: 1100px; margin: 0 auto; padding: 32px 32px 60px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── SECTION ── */
+    .section-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid var(--navy);
+    }
+    .section-head h2   { font-size: 18px; font-weight: 700; color: var(--navy); }
+    .section-note      { font-size: 12.5px; color: var(--gray); margin-top: 3px; }
+    .subsection-title  {
+      font-size: 15px; font-weight: 600; color: var(--navy);
+      padding-left: 10px; border-left: 3px solid var(--blue);
+      margin: 28px 0 14px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn { padding: 8px 18px; border-radius: 5px; font-size: 13px; font-weight: 500; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover { background: var(--blue); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover { background: #14803a; }
+    .btn-danger  { background: var(--red); color: #fff; }
+    .btn-danger:hover  { background: #b91c1c; }
+    .btn-outline { border: 1.5px solid var(--border); background: #fff; color: var(--text); }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--navy); color: #fff; padding: 10px 24px; border-radius: 6px; font-size: 13px;
+      opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ════════ 색상 관리 탭 ════════ */
+    .color-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .color-table th {
+      background: var(--navy); color: #fff; padding: 10px 12px;
+      font-weight: 500; font-size: 13px; text-align: left;
+    }
+    .color-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .color-table tbody tr:hover { background: #f8fafc; }
+    .color-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid rgba(0,0,0,.1); display: inline-block; flex-shrink: 0;
+    }
+    .color-row-swatch { display: flex; align-items: center; gap: 8px; }
+    .tbl-input { border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; width: 100%; outline: none; }
+    .tbl-input:focus { border-color: var(--blue); }
+    .tbl-input-hex { width: 90px; font-family: monospace; }
+    .color-picker-inline { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 4px; padding: 1px; cursor: pointer; }
+
+    .add-color-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 22px 24px; margin-bottom: 28px; }
+    .add-color-box h3 { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 14px; }
+    .add-color-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .add-color-row input[type="text"] { border: 1.5px solid var(--border); border-radius: 5px; padding: 8px 10px; outline: none; }
+    .add-color-row input[type="text"]:focus { border-color: var(--blue); }
+    .inp-name { width: 120px; }
+    .inp-hex  { width: 100px; font-family: monospace; }
+
+    /* 끈별 색상 지정 */
+    .cord-color-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 22px 24px; }
+    .cord-color-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .cord-color-tab-btn {
+      padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      border: 1.5px solid var(--border); background: #fff; color: var(--gray); transition: all .2s;
+    }
+    .cord-color-tab-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .cord-color-tab-btn.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+    .color-checkbox-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 16px;
+    }
+    .color-checkbox-item {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; cursor: pointer;
+      transition: border-color .15s;
+    }
+    .color-checkbox-item:hover { border-color: var(--sky); }
+    .color-checkbox-item.checked { border-color: var(--navy); background: var(--light); }
+    .color-checkbox-dot { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); flex-shrink: 0; }
+    .color-checkbox-name { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .color-checkbox-item input { display: none; }
+    .select-all-row { display: flex; gap: 8px; margin-bottom: 12px; }
+
+    /* ════════ 사진 관리 탭 ════════ */
+    .cord-tab-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .cord-tab-btn {
+      padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      border: 1.5px solid var(--border); background: #fff; color: var(--gray); transition: all .2s;
+    }
+    .cord-tab-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .cord-tab-btn.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+    .photo-type-bar { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .photo-type-btn {
+      padding: 6px 18px; border-radius: 4px; font-size: 13px; font-weight: 500;
+      border: 1.5px solid var(--border); background: #fff; color: var(--gray); transition: all .2s;
+    }
+    .photo-type-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .photo-type-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+    .photo-card { border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+    .photo-card-img { height: 100px; position: relative; overflow: hidden; }
+    .photo-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-card-color-bg { position: absolute; inset: 0; }
+    .photo-card-name { padding: 6px 8px; font-size: 12px; color: var(--text); text-align: center; border-top: 1px solid var(--border); }
+    .photo-badge {
+      position: absolute; top: 5px; right: 5px;
+      background: var(--green); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px;
+    }
+    .photo-card-actions { padding: 6px 8px; display: flex; gap: 5px; justify-content: center; }
+    .photo-upload-label {
+      display: block; width: 100%; padding: 6px 0; font-size: 11.5px; text-align: center; cursor: pointer;
+      background: var(--light); color: var(--blue); font-weight: 500; border-radius: 0 0 6px 6px; transition: background .15s;
+    }
+    .photo-upload-label:hover { background: #d0e8f8; }
+    .photo-delete-btn {
+      font-size: 11px; color: var(--red); padding: 3px 8px;
+      border: 1px solid #fca5a5; border-radius: 3px; background: #fff;
+    }
+    .photo-delete-btn:hover { background: #fee2e2; }
+    .file-input-hidden { display: none; }
+
+    /* ════════ 설정 탭 ════════ */
+    .settings-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px; max-width: 480px; }
+    .settings-card h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 16px; }
+    .settings-field { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .settings-field input { border: 1.5px solid var(--border); border-radius: 5px; padding: 10px 12px; outline: none; }
+    .settings-field input:focus { border-color: var(--blue); }
+    .settings-msg { font-size: 13px; margin-top: 6px; min-height: 20px; }
+    .settings-msg.ok  { color: var(--green); }
+    .settings-msg.err { color: var(--red); }
+    .danger-card { background: #fff; border: 1px solid #fca5a5; border-radius: 8px; padding: 24px; max-width: 480px; }
+    .danger-card h3 { font-size: 15px; font-weight: 600; color: var(--red); margin-bottom: 8px; }
+    .danger-card p  { font-size: 13px; color: var(--gray); margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+
+  <!-- ══ LOGIN ══ -->
+  <div id="login-wrap">
+    <div class="login-box">
+      <h1>🔐 남도실업 관리자</h1>
+      <p>관리자 비밀번호를 입력해주세요</p>
+      <input type="password" class="login-input" id="pw-input" placeholder="비밀번호" />
+      <button class="login-btn" id="login-btn">로그인</button>
+      <div class="login-error" id="login-error"></div>
+      <p class="login-hint">초기 비밀번호: <code>namdo2024</code></p>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div id="dashboard">
+
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <h1>남도실업 관리자</h1>
+        <a href="index.html">← 사이트로 돌아가기</a>
+      </div>
+      <button class="logout-btn" id="logout-btn">로그아웃</button>
+    </header>
+
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-tab="colors">색상 관리</button>
+      <button class="tab-btn"        data-tab="photos">사진 관리</button>
+      <button class="tab-btn"        data-tab="settings">설정</button>
+    </div>
+
+    <div class="admin-body">
+
+      <!-- ── 색상 관리 ── -->
+      <div id="tab-colors" class="tab-pane active">
+        <div class="section-head">
+          <div>
+            <h2>색상 관리</h2>
+            <p class="section-note">색상 추가·수정·삭제 및 끈 종류별 색상 지정</p>
+          </div>
+          <button class="btn btn-outline" id="reset-colors-btn">기본값으로 초기화</button>
+        </div>
+
+        <!-- 색상 목록 테이블 -->
+        <table class="color-table" id="color-table">
+          <thead>
+            <tr>
+              <th style="width:36px;">#</th>
+              <th style="width:80px;">미리보기</th>
+              <th>색상명</th>
+              <th>헥스 코드</th>
+              <th style="width:76px;">밝은색</th>
+              <th style="width:130px;">저장</th>
+            </tr>
+          </thead>
+          <tbody id="color-tbody"></tbody>
+        </table>
+
+        <!-- 색상 추가 -->
+        <div class="add-color-box">
+          <h3>+ 색상 추가</h3>
+          <div class="add-color-row">
+            <input type="text"  class="inp-name" id="new-name"   placeholder="색상명 (예: 민트)" />
+            <input type="color" id="new-picker"  value="#00C896" title="색상 선택"
+              style="width:40px;height:36px;border:1.5px solid var(--border);border-radius:5px;padding:2px;cursor:pointer;" />
+            <input type="text"  class="inp-hex"  id="new-hex"    value="#00C896" placeholder="#000000" />
+            <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+              <input type="checkbox" id="new-light" /> 밝은 색상
+            </label>
+            <button class="btn btn-primary" id="add-color-btn">추가</button>
+          </div>
+        </div>
+
+        <!-- 끈별 색상 지정 -->
+        <div class="subsection-title">끈별 색상 사용 설정</div>
+        <div class="cord-color-box">
+          <p style="font-size:13px;color:var(--gray);margin-bottom:16px;">
+            각 끈 종류에서 표시할 색상을 선택하세요. 미선택 시 전체 색상이 표시됩니다.
+          </p>
+          <div class="cord-color-tabs" id="cord-color-tabs"></div>
+          <div class="select-all-row">
+            <button class="btn btn-outline btn-sm" id="select-all-btn">전체 선택</button>
+            <button class="btn btn-outline btn-sm" id="deselect-all-btn">전체 해제</button>
+          </div>
+          <div class="color-checkbox-grid" id="cord-color-grid"></div>
+          <button class="btn btn-primary" id="save-cord-colors-btn">저장</button>
+        </div>
+      </div>
+
+      <!-- ── 사진 관리 ── -->
+      <div id="tab-photos" class="tab-pane">
+        <div class="section-head">
+          <div>
+            <h2>사진 관리</h2>
+            <p class="section-note">색상 사진, 직경 사진, 팁 사진을 업로드하세요. 최대 600×600px으로 자동 압축됩니다.</p>
+          </div>
+        </div>
+
+        <!-- 끈 종류 탭 -->
+        <div class="cord-tab-bar" id="cord-tab-bar"></div>
+
+        <!-- 사진 유형 탭 -->
+        <div class="photo-type-bar" id="photo-type-bar">
+          <button class="photo-type-btn active" data-ptype="color">🎨 색상 사진</button>
+          <button class="photo-type-btn"        data-ptype="size" >📏 직경 사진</button>
+          <button class="photo-type-btn"        data-ptype="tip"  >🔩 팁 사진</button>
+        </div>
+
+        <div id="photo-grid" class="photo-grid"></div>
+      </div>
+
+      <!-- ── 설정 ── -->
+      <div id="tab-settings" class="tab-pane">
+        <div class="section-head"><h2>설정</h2></div>
+
+        <div class="settings-card">
+          <h3>🔑 비밀번호 변경</h3>
+          <div class="settings-field">
+            <input type="password" id="old-pw"  placeholder="현재 비밀번호" />
+            <input type="password" id="new-pw"  placeholder="새 비밀번호 (4자 이상)" />
+            <input type="password" id="new-pw2" placeholder="새 비밀번호 확인" />
+          </div>
+          <button class="btn btn-primary" id="change-pw-btn">비밀번호 변경</button>
+          <p class="settings-msg" id="pw-msg"></p>
+        </div>
+
+        <div class="danger-card">
+          <h3>⚠️ 데이터 초기화</h3>
+          <p>색상, 사진, 끈별 색상 설정, 비밀번호 등 모든 관리자 설정이 삭제됩니다.</p>
+          <button class="btn btn-danger" id="reset-all-btn">모든 데이터 초기화</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="data.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
