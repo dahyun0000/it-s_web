@@ -359,6 +359,7 @@ function showSpecs() {
           주문 문의: <strong>062-000-0000</strong> &nbsp;|&nbsp; 평일 09:00~18:00
         </div>
         <button class="btn-order-form" id="btn-order-form">✉️ 주문 문의하기</button>
+        <div class="order-inline-box" id="order-inline-box" hidden></div>
       </div>
 
     </div>
@@ -499,99 +500,64 @@ function updateSummary() {
 }
 
 /* ═══════════════════════════════════════════
-   주문 문의 모달
+   주문 문의 인라인 박스
    ═══════════════════════════════════════════ */
 function showOrderForm() {
+  const box = document.getElementById('order-inline-box');
+  const btn = document.getElementById('btn-order-form');
+  if (!box) return;
+
+  /* 토글: 이미 열려있으면 닫기 */
+  if (!box.hidden) {
+    box.hidden = true;
+    btn.classList.remove('active');
+    return;
+  }
+
   const colorData = COLORS.find(c => c.id === state.color);
   const spec      = SPECS[state.cord];
   const sizeData  = spec?.sizes.find(s => s.id === state.size);
   const tipData   = spec?.tips.find(t => t.id === state.tip);
   const today     = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  /* 기존 모달 제거 */
-  document.getElementById('order-modal-wrap')?.remove();
-
-  const wrap = document.createElement('div');
-  wrap.id = 'order-modal-wrap';
-  wrap.className = 'order-modal-wrap';
-  wrap.innerHTML = `
-    <div class="order-modal" role="dialog" aria-modal="true" aria-label="주문 문의">
-      <button class="order-modal-close" id="order-modal-close" aria-label="닫기">&times;</button>
-      <h2 class="order-modal-title">주문 문의</h2>
-      <p class="order-modal-sub">아래 정보를 확인 후 이메일 또는 팩스로 보내주세요.</p>
-
-      <div class="order-modal-section">
-        <div class="order-modal-section-label">선택 내용</div>
-        <div class="order-chips">
-          ${spec ? `<span class="order-chip">${spec.label}</span>` : ''}
-          ${colorData ? `<span class="order-chip">${colorData.name}</span>` : ''}
-          ${sizeData  ? `<span class="order-chip">${sizeData.label}</span>` : ''}
-          ${state.length ? `<span class="order-chip">${state.length}</span>` : ''}
-          ${tipData   ? `<span class="order-chip">${tipData.label}</span>` : ''}
-        </div>
-      </div>
-
-      <div class="order-modal-section">
-        <div class="order-modal-section-label">주문자 정보 입력</div>
-        <div class="order-fields">
-          <label class="order-field">
-            <span>업체명</span>
-            <input type="text" id="of-company" placeholder="업체명을 입력하세요" />
-          </label>
-          <label class="order-field">
-            <span>담당자</span>
-            <input type="text" id="of-name" placeholder="담당자명" />
-          </label>
-          <label class="order-field">
-            <span>연락처</span>
-            <input type="tel" id="of-tel" placeholder="010-0000-0000" />
-          </label>
-          <label class="order-field">
-            <span>수량</span>
-            <input type="number" id="of-qty" placeholder="수량 (단위: 개)" min="1" />
-          </label>
-          <label class="order-field order-field-full">
-            <span>요청사항</span>
-            <textarea id="of-note" placeholder="특이사항을 입력하세요"></textarea>
-          </label>
-        </div>
-      </div>
-
-      <div class="order-modal-btns">
-        <button class="order-btn order-btn-email" id="order-btn-email">📧 이메일로 보내기</button>
-        <button class="order-btn order-btn-fax"   id="order-btn-fax">📠 팩스로 보내기</button>
-      </div>
-
-      <div class="order-fax-box" id="order-fax-box" hidden>
-        <div class="order-fax-label">팩스 번호</div>
-        <div class="order-fax-num">062-000-0001</div>
-        <div class="order-fax-content" id="order-fax-content"></div>
-        <p class="order-fax-hint">위 내용을 작성하여 팩스로 보내주시면 담당자가 확인 후 연락드립니다.</p>
-      </div>
+  box.innerHTML = `
+    <div class="oib-chips">
+      ${spec       ? `<span class="oib-chip">${spec.label}</span>`       : ''}
+      ${colorData  ? `<span class="oib-chip">${colorData.name}</span>`   : ''}
+      ${sizeData   ? `<span class="oib-chip">${sizeData.label}</span>`   : ''}
+      ${state.length ? `<span class="oib-chip">${state.length}</span>`   : ''}
+      ${tipData    ? `<span class="oib-chip">${tipData.label}</span>`    : ''}
+    </div>
+    <div class="oib-fields">
+      <label class="oib-field"><span>업체명</span><input type="text"    id="of-company" placeholder="업체명" /></label>
+      <label class="oib-field"><span>담당자</span><input type="text"    id="of-name"    placeholder="담당자명" /></label>
+      <label class="oib-field"><span>연락처</span><input type="tel"     id="of-tel"     placeholder="010-0000-0000" /></label>
+      <label class="oib-field"><span>수량</span>  <input type="number"  id="of-qty"     placeholder="수량 (개)" min="1" /></label>
+      <label class="oib-field oib-field-full"><span>요청사항</span><textarea id="of-note" placeholder="특이사항"></textarea></label>
+    </div>
+    <div class="oib-btns">
+      <button class="oib-btn oib-btn-email" id="oib-btn-email">📧 이메일로 보내기</button>
+      <button class="oib-btn oib-btn-fax"   id="oib-btn-fax">📠 팩스로 보내기</button>
+    </div>
+    <div class="oib-fax-box" id="oib-fax-box" hidden>
+      <div class="oib-fax-num">📠 팩스번호: <strong>062-000-0001</strong></div>
+      <pre class="oib-fax-content" id="oib-fax-content"></pre>
+      <p class="oib-fax-hint">위 내용을 팩스로 보내주시면 담당자가 확인 후 연락드립니다.</p>
     </div>
   `;
-  document.body.appendChild(wrap);
 
-  /* 닫기 */
-  document.getElementById('order-modal-close').addEventListener('click', () => wrap.remove());
-  wrap.addEventListener('click', e => { if (e.target === wrap) wrap.remove(); });
+  box.hidden = false;
+  btn.classList.add('active');
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  /* 이메일 버튼 */
-  document.getElementById('order-btn-email').addEventListener('click', () => {
-    const company = document.getElementById('of-company').value.trim();
-    const name    = document.getElementById('of-name').value.trim();
-    const tel     = document.getElementById('of-tel').value.trim();
-    const qty     = document.getElementById('of-qty').value.trim();
-    const note    = document.getElementById('of-note').value.trim();
-
-    const subject = encodeURIComponent(`[주문문의] 남도실업 쇼핑백끈 - ${spec?.label || ''} ${colorData?.name || ''}`);
-    const body = encodeURIComponent(
+  function getOrderText() {
+    return (
 `남도실업 주문 문의
 ━━━━━━━━━━━━━━━━━━━━━━━━
 일자: ${today}
-업체명: ${company || '(미입력)'}
-담당자: ${name || '(미입력)'}
-연락처: ${tel || '(미입력)'}
+업체명: ${document.getElementById('of-company').value.trim() || '(미입력)'}
+담당자: ${document.getElementById('of-name').value.trim() || '(미입력)'}
+연락처: ${document.getElementById('of-tel').value.trim() || '(미입력)'}
 
 [주문 내용]
 끈 종류: ${spec?.label || '-'}
@@ -599,44 +565,23 @@ function showOrderForm() {
 직경: ${sizeData?.label || '-'}
 길이: ${state.length || '-'}
 팁 종류: ${tipData?.label || '-'}
-수량: ${qty || '(미입력)'}
+수량: ${document.getElementById('of-qty').value.trim() || '(미입력)'}
 
 [요청사항]
-${note || '없음'}
+${document.getElementById('of-note').value.trim() || '없음'}
 ━━━━━━━━━━━━━━━━━━━━━━━━`
     );
+  }
+
+  document.getElementById('oib-btn-email').addEventListener('click', () => {
+    const subject = encodeURIComponent(`[주문문의] 남도실업 쇼핑백끈 - ${spec?.label || ''} ${colorData?.name || ''}`);
+    const body    = encodeURIComponent(getOrderText());
     window.location.href = `mailto:namdo@example.com?subject=${subject}&body=${body}`;
   });
 
-  /* 팩스 버튼 */
-  document.getElementById('order-btn-fax').addEventListener('click', () => {
-    const company = document.getElementById('of-company').value.trim();
-    const name    = document.getElementById('of-name').value.trim();
-    const tel     = document.getElementById('of-tel').value.trim();
-    const qty     = document.getElementById('of-qty').value.trim();
-    const note    = document.getElementById('of-note').value.trim();
-
-    const faxBox     = document.getElementById('order-fax-box');
-    const faxContent = document.getElementById('order-fax-content');
-    faxContent.textContent =
-`남도실업 주문 문의
-━━━━━━━━━━━━━━━━━━━━━━━━
-일자: ${today}
-업체명: ${company || '(미입력)'}
-담당자: ${name || '(미입력)'}
-연락처: ${tel || '(미입력)'}
-
-[주문 내용]
-끈 종류: ${spec?.label || '-'}
-색상: ${colorData?.name || '-'}
-직경: ${sizeData?.label || '-'}
-길이: ${state.length || '-'}
-팁 종류: ${tipData?.label || '-'}
-수량: ${qty || '(미입력)'}
-
-[요청사항]
-${note || '없음'}
-━━━━━━━━━━━━━━━━━━━━━━━━`;
+  document.getElementById('oib-btn-fax').addEventListener('click', () => {
+    const faxBox = document.getElementById('oib-fax-box');
+    document.getElementById('oib-fax-content').textContent = getOrderText();
     faxBox.hidden = false;
     faxBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });

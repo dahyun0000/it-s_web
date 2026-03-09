@@ -101,6 +101,7 @@ nav {
 }
 nav ul {
   display: flex;
+  justify-content: center;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 40px;
@@ -120,7 +121,7 @@ nav ul {
 }
 .nav-btn:hover { background: var(--blue); color: #fff; }
 .nav-btn.active { background: var(--blue); color: #fff; }
-.nav-about { color: #8fa8bf; font-size: 13px; }
+.nav-about { color: #a0c8e8; font-size: 13px; }
 
 
 /* ── BREADCRUMB ── */
@@ -650,7 +651,109 @@ nav ul {
   transition: background .2s;
   letter-spacing: 0.3px;
 }
-.btn-order-form:hover { background: #14803a; }
+.btn-order-form:hover  { background: #14803a; }
+.btn-order-form.active { background: #14803a; }
+
+/* ── 주문 문의 인라인 박스 ── */
+.order-inline-box {
+  margin-top: 18px;
+  background: #f7fbff;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  border-radius: 8px;
+  padding: 22px 22px 18px;
+  animation: fadeIn .25s ease;
+}
+.oib-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.oib-chip {
+  background: var(--navy);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.oib-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  margin-bottom: 16px;
+}
+.oib-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--gray);
+}
+.oib-field span { font-weight: 600; color: var(--navy); }
+.oib-field input,
+.oib-field textarea {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s;
+  background: #fff;
+  resize: vertical;
+}
+.oib-field input:focus,
+.oib-field textarea:focus { border-color: var(--navy); }
+.oib-field-full { grid-column: 1 / -1; }
+.oib-field-full textarea { min-height: 58px; }
+.oib-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.oib-btn {
+  flex: 1;
+  min-width: 140px;
+  border: none;
+  border-radius: 6px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .2s;
+}
+.oib-btn-email { background: var(--navy); color: #fff; }
+.oib-btn-email:hover { background: #2c5f8a; }
+.oib-btn-fax   { background: #fff; color: var(--navy); border: 2px solid var(--navy); }
+.oib-btn-fax:hover { background: var(--light); }
+.oib-fax-box {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  animation: fadeIn .2s ease;
+}
+.oib-fax-num { font-size: 14px; color: var(--navy); margin-bottom: 10px; }
+.oib-fax-content {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  background: var(--light);
+  border-radius: 5px;
+  padding: 12px 14px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.oib-fax-hint { font-size: 12px; color: var(--gray); }
+
+@media (max-width: 520px) {
+  .oib-fields { grid-template-columns: 1fr; }
+}
 
 /* Spec summary box */
 .spec-summary {
