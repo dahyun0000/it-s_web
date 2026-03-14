@@ -162,7 +162,7 @@ function showColors(cordId) {
         <div class="preview-color-name" id="preview-name">&nbsp;</div>
         <div class="preview-color-hex"  id="preview-hex">&nbsp;</div>
         <div class="preview-cord-type">${cord.name}</div>
-        <button class="btn-select-color" id="btn-select-color" disabled>색상을 선택해주세요</button>
+        <div class="preview-select-hint" id="preview-select-hint">색상을 클릭하면 상세 옵션을 선택할 수 있습니다. \ (직경, 길이, 팁 종류) </div>
       </div>
 
       <div class="color-grid-panel">
@@ -199,7 +199,6 @@ function setupColorViewEvents() {
   const $previewName = document.getElementById('preview-name');
   const $previewHex  = document.getElementById('preview-hex');
   const $placeholder = document.getElementById('preview-placeholder');
-  const $btnSelect   = document.getElementById('btn-select-color');
   const cards        = document.querySelectorAll('.color-swatch-card');
 
   function applyPreview(colorId) {
@@ -245,16 +244,9 @@ function setupColorViewEvents() {
     card.addEventListener('mouseleave', restoreSelected);
     card.addEventListener('click', () => {
       state.color = card.dataset.color;
-      const c = COLORS.find(x => x.id === state.color);
-      applyPreview(state.color);
-      $btnSelect.disabled = false;
-      $btnSelect.textContent = `${c.name} 선택 →`;
-      cards.forEach(x => x.classList.remove('selected'));
-      card.classList.add('selected');
+      showSpecs();
     });
   });
-
-  $btnSelect.addEventListener('click', () => { if (state.color) showSpecs(); });
 }
 
 /* ═══════════════════════════════════════════
@@ -518,73 +510,30 @@ function showOrderForm() {
   const spec      = SPECS[state.cord];
   const sizeData  = spec?.sizes.find(s => s.id === state.size);
   const tipData   = spec?.tips.find(t => t.id === state.tip);
-  const today     = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const rows = [
+    { label: '끈 종류', value: spec?.label },
+    { label: '색상',   value: colorData?.name },
+    { label: '직경',   value: sizeData?.label },
+    { label: '길이',   value: state.length },
+    { label: '팁 종류', value: tipData?.label },
+  ].filter(r => r.value);
 
   box.innerHTML = `
-    <div class="oib-chips">
-      ${spec       ? `<span class="oib-chip">${spec.label}</span>`       : ''}
-      ${colorData  ? `<span class="oib-chip">${colorData.name}</span>`   : ''}
-      ${sizeData   ? `<span class="oib-chip">${sizeData.label}</span>`   : ''}
-      ${state.length ? `<span class="oib-chip">${state.length}</span>`   : ''}
-      ${tipData    ? `<span class="oib-chip">${tipData.label}</span>`    : ''}
-    </div>
-    <div class="oib-fields">
-      <label class="oib-field"><span>업체명</span><input type="text"    id="of-company" placeholder="업체명" /></label>
-      <label class="oib-field"><span>담당자</span><input type="text"    id="of-name"    placeholder="담당자명" /></label>
-      <label class="oib-field"><span>연락처</span><input type="tel"     id="of-tel"     placeholder="010-0000-0000" /></label>
-      <label class="oib-field"><span>수량</span>  <input type="number"  id="of-qty"     placeholder="수량 (개)" min="1" /></label>
-      <label class="oib-field oib-field-full"><span>요청사항</span><textarea id="of-note" placeholder="특이사항"></textarea></label>
-    </div>
-    <div class="oib-btns">
-      <button class="oib-btn oib-btn-email" id="oib-btn-email">📧 이메일로 보내기</button>
-      <button class="oib-btn oib-btn-fax"   id="oib-btn-fax">📠 팩스로 보내기</button>
-    </div>
-    <div class="oib-fax-box" id="oib-fax-box" hidden>
-      <div class="oib-fax-num">📠 팩스번호: <strong>062-000-0001</strong></div>
-      <pre class="oib-fax-content" id="oib-fax-content"></pre>
-      <p class="oib-fax-hint">위 내용을 팩스로 보내주시면 담당자가 확인 후 연락드립니다.</p>
+    <div class="oib-order-title">내 주문 내용</div>
+    <table class="oib-order-table">
+      ${rows.map(r => `<tr><th>${r.label}</th><td>${r.value}</td></tr>`).join('')}
+    </table>
+    <div class="oib-contact-box">
+      <div class="oib-contact-row">📞 <strong>전화 문의</strong>&nbsp; 053-313-4469</div>
+      <div class="oib-contact-row">📠 <strong>팩스</strong>&nbsp; 053-955-0441</div>
+      <p class="oib-contact-hint">위 내용을 전달하시면 담당자가 확인 후 안내드립니다.<br>평일 09:00 ~ 18:00</p>
     </div>
   `;
 
   box.hidden = false;
   btn.classList.add('active');
   box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-  function getOrderText() {
-    return (
-`남도실업 주문 문의
-━━━━━━━━━━━━━━━━━━━━━━━━
-일자: ${today}
-업체명: ${document.getElementById('of-company').value.trim() || '(미입력)'}
-담당자: ${document.getElementById('of-name').value.trim() || '(미입력)'}
-연락처: ${document.getElementById('of-tel').value.trim() || '(미입력)'}
-
-[주문 내용]
-끈 종류: ${spec?.label || '-'}
-색상: ${colorData?.name || '-'}
-직경: ${sizeData?.label || '-'}
-길이: ${state.length || '-'}
-팁 종류: ${tipData?.label || '-'}
-수량: ${document.getElementById('of-qty').value.trim() || '(미입력)'}
-
-[요청사항]
-${document.getElementById('of-note').value.trim() || '없음'}
-━━━━━━━━━━━━━━━━━━━━━━━━`
-    );
-  }
-
-  document.getElementById('oib-btn-email').addEventListener('click', () => {
-    const subject = encodeURIComponent(`[주문문의] 남도실업 쇼핑백끈 - ${spec?.label || ''} ${colorData?.name || ''}`);
-    const body    = encodeURIComponent(getOrderText());
-    window.location.href = `mailto:namdo@example.com?subject=${subject}&body=${body}`;
-  });
-
-  document.getElementById('oib-btn-fax').addEventListener('click', () => {
-    const faxBox = document.getElementById('oib-fax-box');
-    document.getElementById('oib-fax-content').textContent = getOrderText();
-    faxBox.hidden = false;
-    faxBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  });
 }
 
 /* ═══════════════════════════════════════════
@@ -596,10 +545,10 @@ function showAbout() {
   $app.innerHTML = `
     <div class="about-view">
       <h2>남도실업 소개</h2>
-      <p>1990년대부터 쇼핑백끈 전문 유통기업으로 시작하여<br>20년 이상의 경력을 바탕으로 성장한 남도실업입니다.</p>
+      <p>남도실업은 쇼핑백끈 전문 유통기업으로 <br>20년 이상의 경력을 바탕으로 성장했습니다.</p>
       <p>브레이드·면·꽈배기·리본 등 다양한 끈을 대량으로 신속하게 공급하며,<br>맞춤 제작 상담도 가능합니다.</p>
-      <p style="color:var(--gray);font-size:13px;">광주광역시 남구 &nbsp;|&nbsp; 사업자등록번호: 000-00-00000</p>
-      <div class="about-contact">고객센터: 062-000-0000</div>
+      <p style="color:var(--gray);font-size:13px;">대구광역시 북구 국우동 1119-10 1층 &nbsp;|&nbsp; 주문문의: 053-313-4469</p>
+      <div class="about-contact">대표 연락처: 010-6512-5835</div>
     </div>
   `;
 }
